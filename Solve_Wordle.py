@@ -1,9 +1,5 @@
 '''
-All functions found here are the same as those found in optimized_functions.py, but split to perform certain operations 
-over multiple lines, making them clearer but less efficient. Documentation for each function is found here. Note that 
-get_best_guess() is a new function, finding the best guess based on our remaining words; it is reused code from solve(),
-turned into a function for use by the NYT class. The NYT class solves the daily Wordle puzzle blind by accessing 
-the New York Times (NYT) Wordle Site.
+Accesses the New York Times Wordle Site and solves the daily Wordle puzzle based on a greedy search algorithm.
 '''
 
 import numpy as np
