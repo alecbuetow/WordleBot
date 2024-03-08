@@ -4,7 +4,7 @@ This repository contains the code needed to access the New York Times daily Word
 
 ## Key Takeaways
 
-- **Performance**: Solves the Wordle Puzzle in 3.57 guesses on average, compared to [New York Times' best performing model's](https://www.nytimes.com/2022/08/17/upshot/wordle-wordlebot-new.html#:~:text=Only%20slightly.,more%20times%20in%20hard%20mode.) 3.40 guesses. For reference, [the average wordle user takes 3.92 guesses](https://www.forbes.com/sites/mattgardner1/2022/03/05/wordle-stats-reveal-10-best-countries-and-america-misses-out/?sh=659172502d62). 
+- **Performance**: Solves the Wordle Puzzle in 3.54 guesses on average, compared to [New York Times' best performing model's](https://www.nytimes.com/2022/08/17/upshot/wordle-wordlebot-new.html#:~:text=Only%20slightly.,more%20times%20in%20hard%20mode.) 3.40 guesses. For reference, [the average wordle user takes 3.92 guesses](https://www.forbes.com/sites/mattgardner1/2022/03/05/wordle-stats-reveal-10-best-countries-and-america-misses-out/?sh=659172502d62). 
 - **Technique**: WordleBot accesses the New York Times' website and navigates to the Wordle puzzle with `selenium` through the Chromium Browser. It chooses which word to guess based on the algorithm discussed below.
 - **Efficiency Improvements**: WordleBot was optimized from its previous iterations using vectorized operations. Masking a `numpy` array, rather than iterating through a list, provided a 90% improvement in processing time. 
 
