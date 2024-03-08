@@ -29,7 +29,7 @@ In doing so, it is able to solve all Wordle answers in 6 guesses or fewer, marki
 
 ## Future Directions
 
-Reinforcement learning seems to be a promising machine learning approach which could solve the Wordle puzzle stochastically. Based on preliminary research, it seems that training such an algorithm requires millions of cycles and resulting models take 4 guesses on average, worse than our deterministic approach. For my next steps, I would like to combine the two and see if I can leverage the reinforcement learning model's ability to look more than one step ahead in further improving the semi-greedy search algorithm, which only sees one state in front of its current one. 
+Reinforcement learning seems to be a promising machine learning approach which could solve the Wordle puzzle stochastically. Based on preliminary research, it seems that training such an algorithm requires millions of cycles and resulting models take 4 guesses on average, worse than our deterministic approach. For my next steps, I would like to combine the two and see if I can leverage the reinforcement learning model's ability to look more than one step ahead in further improving the greedy search algorithm, which only sees one state in front of its current one. 
 
 ## Dependencies
 
