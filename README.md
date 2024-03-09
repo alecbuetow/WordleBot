@@ -1,6 +1,6 @@
 # WordleBot
 
-This repository contains the code needed to access the New York Times daily Wordle puzzle and solve it via semi-greedy search algorithm. 
+This repository contains the code needed to access the New York Times daily Wordle puzzle and solve it via greedy search algorithm. 
 
 ## Key Takeaways
 
