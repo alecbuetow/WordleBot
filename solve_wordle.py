@@ -19,6 +19,60 @@ with open('answers.txt', 'r') as all_possible_guesses_file:
     all_possible_guesses = [g.strip() for g in all_possible_guesses_file.readlines()]
 all_possible_guesses = np.asarray([list(w) for w in all_possible_guesses]) #convert to array for faster operations
 
+
+
+class NYT:
+    """Tools to solve the current Wordle by accessing the NYT Wordle website"""
+
+    #convert info from NYT website to numeric form for WordleBot to read
+    color_dict = {'absent': 0, 'present': 1, 'correct': 2, 'empty': -1}
+
+    @classmethod
+    def load_wordle_site(cls):
+        """Open Wordle site"""
+        cls.chrome = Chrome()
+        cls.chrome.get('https://www.nytimes.com/games/wordle/index.html')
+        play_button = cls.chrome.find_element(By.XPATH, '//button[text()="Play"]')
+        play_button.click()
+
+        #close tutorial popup
+        tutorial_exit_path = (By.XPATH, '//button[@class="Modal-module_closeIcon__TcEKb"]')
+        close_tutorial = WebDriverWait(cls.chrome, 10).until(EC.presence_of_element_located(tutorial_exit_path))
+        close_tutorial.click()
+        time.sleep(2) #gives time for closing animation to complete 
+
+    @classmethod
+    def send_guess(cls, guess: np.array):
+        """Reformat guess from an array to string, send it to Wordle website"""
+        guess = ''.join([letter for letter in guess])
+        actions = ActionChains(cls.chrome)
+        actions.send_keys(guess)
+        actions.send_keys(Keys.RETURN)
+        actions.perform()
+        time.sleep(2) #gives time for typing animation to complete 
+
+    @classmethod
+    def get_feedback(cls, guess_idx: int) -> np.array:
+        """Read Wordle website to determine which letters from a guess are black/yellow/green"""
+        feedback_tiles = cls.chrome.find_elements(By.XPATH, '//div[@class="Tile-module_tile__UWEHN"]')
+        feedback_colors = [tile.get_attribute("data-state") for tile in feedback_tiles]
+        feedback = np.asarray([cls.color_dict[color] for color in feedback_colors])
+        feedback = feedback[5*guess_idx:5*(guess_idx+1)] #only consider row we just guessed in
+        return feedback
+    
+    @classmethod
+    def solve(cls):
+        """Solves today's Wordle!"""
+        cls.load_wordle_site()
+        guess, remaining_words = np.asarray(list('raise')), all_possible_guesses #initialize first guess and all words that can be guessed
+        #submit guess, update remaining words based on feedback, get new guess 
+        for guess_idx in range(6):
+            cls.send_guess(guess)
+            feedback = cls.get_feedback(guess_idx)
+            guess, remaining_words = WordleBot.get_best_guess(guess, feedback, remaining_words)
+
+
+
 class WordleBot:
     """Tools to solve the Wordle via deterministic greedy search algorithm"""
 
@@ -146,55 +200,3 @@ class WordleBot:
         average_possible_answers = np.mean(num_possible_answers, axis=1)
         guess = remaining_words[np.argmin(average_possible_answers)]
         return guess, remaining_words
-    
-
-
-class NYT:
-    """Tools to solve the current Wordle by accessing the NYT Wordle website"""
-
-    #convert info from NYT website to numeric form for WordleBot to read
-    color_dict = {'absent': 0, 'present': 1, 'correct': 2, 'empty': -1}
-
-    @classmethod
-    def load_wordle_site(cls):
-        """Open Wordle site"""
-        cls.chrome = Chrome()
-        cls.chrome.get('https://www.nytimes.com/games/wordle/index.html')
-        play_button = cls.chrome.find_element(By.XPATH, '//button[text()="Play"]')
-        play_button.click()
-
-        #close tutorial popup
-        tutorial_exit_path = (By.XPATH, '//button[@class="Modal-module_closeIcon__TcEKb"]')
-        close_tutorial = WebDriverWait(cls.chrome, 10).until(EC.presence_of_element_located(tutorial_exit_path))
-        close_tutorial.click()
-        time.sleep(2) #gives time for closing animation to complete 
-
-    @classmethod
-    def send_guess(cls, guess: np.array):
-        """Reformat guess from an array to string, send it to Wordle website"""
-        guess = ''.join([letter for letter in guess])
-        actions = ActionChains(cls.chrome)
-        actions.send_keys(guess)
-        actions.send_keys(Keys.RETURN)
-        actions.perform()
-        time.sleep(2) #gives time for typing animation to complete 
-
-    @classmethod
-    def get_feedback(cls, guess_idx: int) -> np.array:
-        """Read Wordle website to determine which letters from a guess are black/yellow/green"""
-        feedback_tiles = cls.chrome.find_elements(By.XPATH, '//div[@class="Tile-module_tile__UWEHN"]')
-        feedback_colors = [tile.get_attribute("data-state") for tile in feedback_tiles]
-        feedback = np.asarray([cls.color_dict[color] for color in feedback_colors])
-        feedback = feedback[5*guess_idx:5*(guess_idx+1)] #only consider row we just guessed in
-        return feedback
-    
-    @classmethod
-    def solve(cls):
-        """Solves today's Wordle!"""
-        cls.load_wordle_site()
-        guess, remaining_words = np.asarray(list('raise')), all_possible_guesses #initialize first guess and all words that can be guessed
-        #submit guess, update remaining words based on feedback, get new guess 
-        for guess_idx in range(6):
-            cls.send_guess(guess)
-            feedback = cls.get_feedback(guess_idx)
-            guess, remaining_words = WordleBot.get_best_guess(guess, feedback, remaining_words)
