@@ -2,6 +2,7 @@
 Accesses the New York Times Wordle Site and solves the daily Wordle puzzle based on a greedy search algorithm.
 '''
 
+#Wordle dependencies
 import numpy as np
 
 #NYT dependencies
@@ -35,7 +36,7 @@ class WordleBot:
                 #count number of times this black letter also appears as a yellow or green elsewhere in the word
                 num_yellows = np.count_nonzero(guess[feedback==1] == letter) 
                 num_greens = np.count_nonzero(guess[feedback==2] == letter)  
-                #if this black letter is not green or yellow elsewhere, remove any word where that letter appears
+                #if this black letter is not green or yellow elsewhere, remove any word which has the letter
                 if num_greens==0 and num_yellows==0:
                     updated_mask = np.all(remaining_words != letter,axis=1)
                     mask = np.logical_and(mask, updated_mask)
@@ -50,7 +51,7 @@ class WordleBot:
                     proper_number_of_yellows = count_yellows==num_yellows
                     updated_mask = np.logical_and(proper_number_of_yellows,remove_black)  
                     mask = np.logical_and(mask, updated_mask)
-                #if this black letter green elsewhere and not yellow elsewhere
+                #if this black letter is green elsewhere and not yellow elsewhere
                 elif num_greens >= 1:
                     #remove all words with this letter except for where it is green 
                     not_green_idx = ~np.logical_and(feedback==2, guess==letter) 
@@ -104,9 +105,9 @@ class WordleBot:
     @staticmethod
     def solve(guess: np.array, answer: np.array, all_possible_guesses: np.array) -> int:
         """
-        Solves the Wordle given a first guess (guess), its answer and a list of possible answers (all_possible_guesses). 
-        Answer is used to return feedback after each new guess, the guessing algorithm does not have access to it. 
-        The list of possible answers is what the guessing algorithm is allowed to select from.
+        Solves the Wordle given a first guess ('guess'), the answer ('answer') and a list of possible answers (all_possible_guesses). 
+        Answer is used to return feedback after each new guess, the guessing algorithm itself does not have access to this information. 
+        The list of possible answers is what the guessing algorithm is allowed to select from. Returns the number of guesses it takes.
         """
         remaining_words = all_possible_guesses.copy()
         for guess_idx in range(6): #only get 6 guesses
@@ -118,7 +119,7 @@ class WordleBot:
             remaining_words = remaining_words[possible_answers]
             #given the current possible answers (remaining_words), how many possible answers are left for every possible guess/answer combination
             num_possible_answers = np.apply_along_axis(WordleBot.get_num_compatible_words, 1, remaining_words, remaining_words)
-            #average the number of possible answers left across each guess and select the best guess (where the fewest average possible answers remaining is)
+            #average the number of possible answers left for each guess and select the best guess (where the fewest average possible answers remaining is)
             average_possible_answers = np.mean(num_possible_answers, axis=1)
             guess = remaining_words[np.argmin(average_possible_answers)]
             #if there are 3-20 possible answers left and they share more than half their letters on average
@@ -134,7 +135,7 @@ class WordleBot:
     def get_best_guess(guess: np.array, feedback: np.array, remaining_words: np.array) -> tuple:
         """
         Finds the best guess based on the last word guessed, the feedback recieved and the previously remaining words.
-        Returns the best guess and new remaining words
+        Returns the best guess and new remaining words. 
         """
         #subset remaining words to only include compatible words (those which are possible answers)
         possible_answers = WordleBot.get_compatible_words(guess, feedback, remaining_words)
@@ -192,7 +193,7 @@ class NYT:
         """Solves today's Wordle!"""
         cls.load_wordle_site()
         guess, remaining_words = np.asarray(list('raise')), all_possible_guesses #initialize first guess and all words that can be guessed
-        #go through guesses, updating remaining words and new guess based on feedback 
+        #submit guess, update remaining words based on feedback, get new guess 
         for guess_idx in range(6):
             cls.send_guess(guess)
             feedback = cls.get_feedback(guess_idx)
